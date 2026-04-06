@@ -43,7 +43,7 @@ This Hospital Management System provides a complete solution for managing hospit
 - **SQL Server** - Relational database
 - **Entity Framework Core Migrations** - Database versioning
 
-## 📁 Project Structure
+## 📁 Project Structur
 
 ```
 Hospital-Management-System/
@@ -126,35 +126,4 @@ npm run dev
 
 The frontend will be available at `http://localhost:3000`
 
-## 👥 User Roles
-
-- **Admin** - Full system access
-- **Doctor** - Patient management, appointments, prescriptions, lab results
-- **Nurse** - Patient care, appointments, room management
-- **Patient** - View own records, appointments, bills
-
-## 📚 Documentation
-
-- [System Architecture](./Documentation/Architecture.md)
-- [Database Schema](./Documentation/Database/Schema.md)
-- [API Documentation](./Documentation/API-Documentation/API.md)
-- [UML Diagrams](./Documentation/UML-Diagrams/)
-- [Deployment Guide](./Documentation/Deployment.md)
-
-## 🔐 Default Credentials
-
-After seeding, you can use these credentials:
-
-- **Admin**: admin@hms.com / Admin@123
-- **Doctor**: doctor@hms.com / Doctor@123
-- **Nurse**: nurse@hms.com / Nurse@123
-- **Patient**: patient@hms.com / Patient@123
-
-## 📝 License
-
-This project is for educational purposes.
-
-## 🤝 Contributing
-
-This is an enterprise-level template. Feel free to extend and customize according to your needs.
 
