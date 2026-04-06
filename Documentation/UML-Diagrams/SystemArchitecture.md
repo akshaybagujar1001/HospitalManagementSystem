@@ -1,0 +1,267 @@
+# System Architecture Diagrams
+
+## Architecture Overview
+
+The Hospital Management System follows Clean Architecture principles with clear separation of concerns across multiple layers.
+
+## Clean Architecture Layers
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Presentation Layer                    │
+│                  (HMS.API - Controllers)                 │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│                  Application Layer                       │
+│         (HMS.Application - Services, DTOs, Validators)    │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│                    Domain Layer                          │
+│            (HMS.Domain - Entities, Interfaces)           │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│                Infrastructure Layer                      │
+│    (HMS.Infrastructure - Data Access, External Services)│
+└─────────────────────────────────────────────────────────┘
+```
+
+## Use Case Diagram
+
+```
+                    ┌─────────────────┐
+                    │   Admin User     │
+                    └────────┬────────┘
+                             │
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        │                    │                    │
+┌───────▼──────┐    ┌────────▼────────┐   ┌──────▼──────┐
+│ Manage Users │    │ Manage Patients  │   │ View Reports│
+└──────────────┘    └─────────────────┘   └─────────────┘
+
+                    ┌─────────────────┐
+                    │   Doctor User    │
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+┌───────▼──────┐    ┌────────▼────────┐   ┌──────▼──────┐
+│View Patients │    │Manage Appointments│  │Write Prescriptions│
+└──────────────┘    └─────────────────┘   └─────────────┘
+
+                    ┌─────────────────┐
+                    │  Patient User   │
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+┌───────▼──────┐    ┌────────▼────────┐   ┌──────▼──────┐
+│Book Appointment│  │View Medical Records│ │View Invoices│
+└──────────────┘    └─────────────────┘   └─────────────┘
+```
+
+## Class Diagram (Simplified)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        User                                  │
+├─────────────────────────────────────────────────────────────┤
+│ +Id: int                                                     │
+│ +FirstName: string                                           │
+│ +LastName: string                                           │
+│ +Email: string                                               │
+│ +PasswordHash: string                                        │
+│ +Role: string                                                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        │                     │                     │
+┌───────▼──────┐    ┌──────────▼──────────┐  ┌─────▼──────┐
+│   Patient    │    │      Doctor         │  │   Nurse    │
+├──────────────┤    ├─────────────────────┤  ├────────────┤
+│ +PatientNumber│  │ +DoctorNumber       │  │ +NurseNumber│
+│ +DateOfBirth  │  │ +Specialization      │  │ +Department│
+│ +BloodGroup   │  │ +ConsultationFee    │  │            │
+└──────────────┘    └─────────────────────┘  └────────────┘
+        │                     │
+        │                     │
+        └──────────┬──────────┘
+                   │
+         ┌─────────▼─────────┐
+         │   Appointment      │
+         ├────────────────────┤
+         │ +AppointmentDate   │
+         │ +AppointmentTime   │
+         │ +Status            │
+         └────────────────────┘
+```
+
+## Sequence Diagram - Appointment Booking
+
+```
+Patient          Frontend          API Controller      AuthService      UnitOfWork      Database
+  │                  │                   │                  │                │              │
+  │──Login───────────>│                  │                  │                │              │
+  │                  │──POST /auth/login>│                  │                │              │
+  │                  │                  │──LoginAsync───────>│                │              │
+  │                  │                  │                  │──GetUser───────>│              │
+  │                  │                  │                  │                │──Query───────>│
+  │                  │                  │                  │<──User─────────│<──Result─────│
+  │                  │                  │<──Token──────────│                │              │
+  │<──Token──────────│<──Token──────────│                  │                │              │
+  │                  │                  │                  │                │              │
+  │──Book Appt───────>│                  │                  │                │              │
+  │                  │──POST /appointments>│                │                │              │
+  │                  │                  │──Create─────────>│                │              │
+  │                  │                  │                  │──AddAsync─────>│              │
+  │                  │                  │                  │                │──Insert─────>│
+  │                  │                  │                  │                │              │
+  │                  │                  │<──Success───────│<──Success──────│<──Success───│
+  │<──Success────────│<──Appointment────│                  │                │              │
+```
+
+## Component Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend (Next.js)                        │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │  Pages   │  │Components│  │  Hooks   │  │  Store   │    │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            │ HTTP/REST
+                            │
+┌───────────────────────────▼─────────────────────────────────┐
+│                    Backend (ASP.NET Core)                   │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │ Controllers  │  │   Services   │  │ Repositories │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │   JWT Auth   │  │  AutoMapper  │  │ FluentValid  │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            │ Entity Framework
+                            │
+┌───────────────────────────▼─────────────────────────────────┐
+│                    SQL Server Database                      │
+├─────────────────────────────────────────────────────────────┤
+│  Users │ Patients │ Doctors │ Appointments │ Invoices │ ... │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Data Flow Diagram
+
+```
+┌─────────┐
+│  User   │
+└────┬────┘
+     │
+     │ Request
+     ▼
+┌─────────────────┐
+│  Frontend App   │
+│  (Next.js)      │
+└────┬────────────┘
+     │
+     │ API Call (Axios)
+     ▼
+┌─────────────────┐
+│  API Controller   │
+│  (ASP.NET Core) │
+└────┬────────────┘
+     │
+     │ Service Call
+     ▼
+┌─────────────────┐
+│  Service Layer  │
+│  (Application)  │
+└────┬────────────┘
+     │
+     │ Repository Call
+     ▼
+┌─────────────────┐
+│  Repository     │
+│  (Infrastructure)│
+└────┬────────────┘
+     │
+     │ EF Core Query
+     ▼
+┌─────────────────┐
+│  SQL Server     │
+│  Database       │
+└─────────────────┘
+```
+
+## Deployment Architecture
+
+```
+                    ┌──────────────┐
+                    │   Internet   │
+                    └──────┬───────┘
+                           │
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│   Frontend   │  │     API      │  │   Database   │
+│   (Vercel)   │  │  (Azure/IIS) │  │ (SQL Server) │
+└──────────────┘  └──────────────┘  └──────────────┘
+        │                  │                  │
+        │                  │                  │
+        └──────────────────┼──────────────────┘
+                           │
+                    ┌───────▼───────┐
+                    │  Load Balancer │
+                    └───────────────┘
+```
+
+## Security Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Client Browser                        │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+                       │ HTTPS
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                    API Gateway                           │
+│              (Authentication & Authorization)             │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+                       │ JWT Token Validation
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                    API Controllers                       │
+│              (Role-Based Access Control)                │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+                       │ Encrypted Connection
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                    SQL Server                            │
+│              (Encrypted at Rest)                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Notes
+
+- All diagrams are simplified representations
+- Actual implementation may have additional components
+- Security measures should be implemented at each layer
+- Consider adding caching layer (Redis) for production
+- Consider adding message queue (RabbitMQ/Azure Service Bus) for async operations
+- Consider adding search service (Elasticsearch) for advanced search capabilities
+
